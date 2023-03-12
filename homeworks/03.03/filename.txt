@@ -1,11 +1,10 @@
 Title
 Link name
-lin to another great page
+ lin to another great page
 This is a header
 This is a middle header
 Send me a message at
-supprot@companyname.ee
+ supprot@companyname.ee
 .
-This is a new paragraph!
 This is another new paragraph!
 This is a new sentence without paragraph break,in bold italics.

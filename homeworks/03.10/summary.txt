@@ -1,0 +1,5 @@
+A total of 7 people have been invited
+The minimum number of participants is 4
+The maximum number of participants is 7
+The minimum budget for the party is 95 euros
+The maximum budget for the party is 125 euros
