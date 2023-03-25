@@ -17,3 +17,15 @@ H
 homeworks/03.10/home1.py,b\6\b6e0f7c7399190175e20ec772b70e2dddb30312f
 H
 homeworks/03.10/home2.py,9\c\9cb4f65dc61dae6499e5a0e20d84902fb6010ef5
+I
+homeworks/03.10/class1.py,4\b\4bc015e2624e1c91ad7bcd79767151a850c3611c
+I
+homeworks/03.10/party.txt,b\4\b402a84315e18a05be2e19f53daa55247c0c3867
+I
+homeworks/03.10/class2.py,c\6\c63844f2001d408395b659abf514f790fd564f09
+J
+homeworks/03.10/prices.txt,c\0\c0dd6540057246a368d8d50713cab97e5049d7c2
+I
+homeworks/03.10/words.txt,b\1\b1b4b683b684bf56bc0d6f6d8400975f5f8b1b6d
+I
+homeworks/03.24/films.txt,6\a\6a50dbf1a221d3bdb53719c51d132f834d837ee3
