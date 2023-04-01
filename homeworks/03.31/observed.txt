@@ -1,0 +1,3 @@
+A total of 52 birds were observed.
+4 bird species were found.
+1 bird species were observed at the observation site 'garden'.
