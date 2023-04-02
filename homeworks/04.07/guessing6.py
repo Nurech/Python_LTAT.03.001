@@ -1,29 +1,28 @@
-from collections import Counter
 import re
 
 
 def get(words, hint):
-    hint_pattern = ""
-    for letter in hint:
-        if letter != "_":
-            hint_pattern += letter
-        else:
-            hint_pattern += "."
+    hint_pattern = re.compile("".join(letter if letter != "_" else "." for letter in hint))
 
     matching_words = []
 
     for word in words:
         if len(word) == len(hint):
-            if re.match(hint_pattern, word):
+            if hint_pattern.match(word):
                 matching_words.append(word)
 
     return matching_words
 
-    return matching_words
 
+def most_common_letter(possible_words, hint, offered_letters):
+    letter_counts = {}
 
-def letters(possible_words, hint, offered_letters, optimal_order):
-    letter_counts = Counter("".join(possible_words))
+    for word in possible_words:
+        for letter in word:
+            if letter not in letter_counts:
+                letter_counts[letter] = 0
+            letter_counts[letter] += 1
+
     for letter in hint:
         if letter in letter_counts:
             del letter_counts[letter]
@@ -33,27 +32,12 @@ def letters(possible_words, hint, offered_letters, optimal_order):
             del letter_counts[letter]
 
     if letter_counts:
-        for letter in optimal_order:
-            if letter in letter_counts:
-                if hint not in offered_letters:
-                    offered_letters[hint] = []
-                offered_letters[hint].append(letter)
-                return letter
+        most_common = max(letter_counts, key=letter_counts.get)
+        if hint not in offered_letters:
+            offered_letters[hint] = []
+        offered_letters[hint].append(most_common)
+        return most_common
     return None
-
-
-
-def next(words, hint, offered_letters, optimal_order):
-    possible_words = get(words, hint)
-    # print(possible_words)
-
-    if len(possible_words) == 1:
-        # print(possible_words[0])
-        return possible_words[0]
-    elif possible_words:
-        return letters(possible_words, hint, offered_letters, optimal_order)
-    else:
-        return None
 
 
 def start(words):
