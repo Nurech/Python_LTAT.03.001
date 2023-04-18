@@ -12,26 +12,15 @@ def clear_console():
         os.system("clear")
 
 def main():
-    wins = defaultdict(int)
-    moves_count = []
+    num_simulations = 100
+    print_interval = 1
 
-    num_simulations = 2  # Configure the number of simulations
-    print_interval = 1   # Configure the interval for printing running results
+    data = load_data()
+    wins = data["wins"]
+    my_wins = data["my_wins"]
+    AI_wins = data["AI_wins"]
 
-    try:
-        with open("simulations.txt", "r") as f:
-            data = json.load(f)
-            wins = defaultdict(int, data["wins"])
-            moves_count = data["moves_count"]
-    except (FileNotFoundError, json.decoder.JSONDecodeError):
-        pass
-
-    combined_wins = defaultdict(int)
-    for key, value in wins.items():
-        combined_wins[int(key)] += value
-    wins = combined_wins
-
-    for i in range(len(moves_count) + 1, len(moves_count) + num_simulations + 1):
+    for i in range(len(my_wins) + len(AI_wins) + 1, len(my_wins) + len(AI_wins) + num_simulations + 1):
         result = subprocess.run([sys.executable, "game.py"], capture_output=True)
         output = result.stdout.decode('utf-8').strip()
 
@@ -46,23 +35,26 @@ def main():
         winner = int(winner_line.split()[1])
 
         wins[winner] += 1
-        moves = ' '.join(lines[:-2])  # Exclude the last line (winner) and the empty line before it
-        moves += f" Winner: Player {winner}"
-        moves_count.append(moves)
+        moves = ' '.join(lines[:-2])
 
-        save_to_file(wins, moves_count)  # Save the results after each successful game
+        if winner == 1:
+            my_wins.append(moves)
+        elif winner == 2:
+            AI_wins.append(moves)
+
+        save_to_file(wins, my_wins, AI_wins)
 
         if i % print_interval == 0:
             clear_console()
             print(f"Completed games: {i}")
-            print_statistics(wins, moves_count)
+            print_statistics(wins)
 
-def print_statistics(wins, moves_count):
+def print_statistics(wins):
+    total_games = sum(wins.values())
     print("Wins statistics:".center(60, "-"))
-    print(f"White (Player 1): {wins[1]}".center(60))
-    print(f"Black (Player 2): {wins[2]}".center(60))
-    print(f"Draws: {wins[0]}".center(60))
-    print()
+    print(f"White (Player 1): {wins[1]} ({wins[1] / total_games * 100:.2f}%)".center(60))
+    print(f"Black (Player 2): {wins[2]} ({wins[2] / total_games * 100:.2f}%)".center(60))
+    print(f"Draws: {wins[0]} ({wins[0] / total_games * 100:.2f}%)".center(60))
 
     print("Win statistics bar chart:".center(60, "-"))
     max_wins = max(wins.values())
@@ -73,15 +65,37 @@ def print_statistics(wins, moves_count):
             label = "Draws"
         else:
             label = f"Player {player}"
+        win_percentage = (win_count / total_games) * 100
         bar = "#" * int((win_count / max_wins) * bar_length)
-        print(f"{label}: {bar} ({win_count})".ljust(60))
-    print("\n" + "-" * 60)
+        print(f"{label}: {bar} ({win_count}, {win_percentage:.2f}%)".ljust(60))
+    print("" + "-" * 60)
 
 
-def save_to_file(wins, moves_count):
+def load_data():
+    try:
+        with open("simulations.txt", "r") as f:
+            data = json.load(f)
+            wins_data = data["wins"]
+            # Combine wins with the same key
+            combined_wins = defaultdict(int)
+            for key, value in wins_data.items():
+                combined_wins[int(key)] += value
+            wins = combined_wins
+            my_wins = data["my_wins"]
+            AI_wins = data["AI_wins"]
+    except (FileNotFoundError, json.decoder.JSONDecodeError):
+        wins = defaultdict(int, {1: 0, 2: 0, 0: 0})
+        my_wins = []
+        AI_wins = []
+
+    return {"wins": wins, "my_wins": my_wins, "AI_wins": AI_wins}
+
+
+def save_to_file(wins, my_wins, AI_wins):
     data = {
         "wins": dict(wins),
-        "moves_count": moves_count
+        "my_wins": my_wins,
+        "AI_wins": AI_wins
     }
 
     with open("simulations.txt", "w") as f:
