@@ -23,3 +23,4 @@ def main():
 
 
 main()
+{'central_bonus': 6, 'protection_bonus': 10, 'capturing_bonus': 2, 'mobility_bonus': 10, 'potential_capture_bonus': 2, 'exposure_penalty': 7, 'aggressive_capture_bonus': 3}

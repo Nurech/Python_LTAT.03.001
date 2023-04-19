@@ -1,0 +1,7 @@
+central_bonus = 3
+protection_bonus = 8
+capturing_bonus = 8
+mobility_bonus = 2
+potential_capture_bonus = 6
+exposure_penalty = 10
+aggressive_capture_bonus = 1
