@@ -1,106 +1,114 @@
-# Prioritize:
-# 1. Force enemy into bad move
-# 2. Take enemy pawn
-# 3. Make empty move when no other options
-# 4. Protect diagonal vectors
-# 5. Try to control center (to take pawns)
-# 6. Alpha-beta pruning (search through a larger space of possible moves)
+import itertools
 
-# Version 1.0 is 14.55% win rate
-# Version 1.1 is 88.00% win rate
-# Version 1.2 ???
 
-# Completed games: 1000
-# ----------------------Wins statistics:----------------------
-# White (Player 1): 880 (88.00%)
-# Black (Player 2): 120 (12.00%)
-# Draws: 0 (0.00%)
-# -----------------Win statistics bar chart:------------------
-# Player 1: ################################################## (880, 88.00%)
-# Player 2: ###### (120, 12.00%)
-# Draws:  (0, 0.00%)
-# ------------------------------------------------------------
+def generate_moves(board, player):
+    moves = []
+    for r, c in itertools.product(range(len(board)), range(len(board[0]))):
+        if board[r][c] == player:
+            for dr, dc in [(1, 0), (1, 1), (1, -1)] if player == 1 else [(-1, 0), (-1, 1), (-1, -1)]:
+                nr, nc = r + dr, c + dc
+                if 0 <= nr < len(board) and 0 <= nc < len(board[0]) and board[nr][nc] != player:
+                    moves.append(((r, c), (nr, nc)))
+    return moves
 
-def find_move(board, player):
-    empty_moves = []
-    capture_moves = []
-    forced_capture_moves = []
 
-    for row in range(len(board)):
-        for col in range(len(board[row])):
-            if board[row][col] == player:
-                moves = get_valid_moves(board, player, row, col)
-                for move in moves:
-                    if is_capture_move(board, move):
-                        capture_moves.append(move)
-                        temp_board = [row[:] for row in board]
-                        make_move(temp_board, player, move)
-                        opponent_moves = get_all_valid_moves(temp_board, 3 - player)
-                        forced_capture = all(is_capture_move(temp_board, m) for m in opponent_moves)
-                        if forced_capture:
-                            forced_capture_moves.append(move)
-                    else:
-                        empty_moves.append(move)
+def apply_move(board, move):
+    new_board = [row.copy() for row in board]
+    src, dest = move
+    new_board[src[0]][src[1]] = 0
+    new_board[dest[0]][dest[1]] = board[src[0]][src[1]]
+    return new_board
 
-    capture_moves.sort(key=lambda move: move[1][0], reverse=(player == 1))
-    empty_moves.sort(key=lambda move: (evaluate_move(board, player, move), move[1][0]), reverse=(player == 1))
 
-    if forced_capture_moves:
-        return forced_capture_moves[0]
-    elif capture_moves:
-        return capture_moves[0]
-    elif empty_moves:
-        return empty_moves[0]
-    else:
-        return None
+def find_move(board, player, config=None):
+    if config is None:
+        config = {
+            "capture_weight": 8,
+            "center_weight": 3,
+            "fork_weight": 5,
+            "defense_weight": 10,
+            "objective_weight": 20,
+            "block_fork_weight": 7,
+            "safe_move_weight": 4,
+        }
 
-def get_all_valid_moves(board, player):
-    all_moves = []
-    for row in range(len(board)):
-        for col in range(len(board[row])):
-            if board[row][col] == player:
-                moves = get_valid_moves(board, player, row, col)
-                all_moves.extend(moves)
-    return all_moves
+    best_move = None
+    best_score = float('-inf')
 
-def make_move(board, player, move):
-    start, end = move
-    start_row, start_col = start
-    end_row, end_col = end
-    board[end_row][end_col] = player
-    board[start_row][start_col] = 0
+    for move in generate_moves(board, player):
+        new_board = apply_move(board, move)
+        score = evaluate_move(new_board, player, move, config)
+        if score > best_score:
+            best_move = move
+            best_score = score
 
-def get_valid_moves(board, player, row, col):
-    direction = 1 if player == 1 else -1
-    valid_moves = []
+    return best_move
 
-    if 0 <= row + direction < len(board) and board[row + direction][col] == 0:
-        valid_moves.append(((row, col), (row + direction, col)))
 
-    for dcol in [-1, 1]:
-        if 0 <= col + dcol < len(board[row]) and 0 <= row + direction < len(board) and board[row + direction][col + dcol] == (3 - player):
-            valid_moves.append(((row, col), (row + direction, col + dcol)))
+def evaluate_move(board, player, move, config):
+    opponent = 3 - player
+    if is_winning_move(board, player, move):
+        return float('inf')
 
-    return valid_moves
+    score = 0
 
-def is_capture_move(board, move):
-    start, end = move
-    end_row, end_col = end
-    return board[end_row][end_col] != 0
+    if is_capturing_move(move) and not is_winning_move(board, opponent, move):
+        score += config["capture_weight"]
 
-def evaluate_move(board, player, move):
-    start, end = move
-    start_row, start_col = start
-    end_row, end_col = end
+    if is_center_move(move):
+        score += config["center_weight"]
 
-    # Center control
-    central_bonus = 0
-    if end_col in [2, 3]:
-        central_bonus = 1
+    if is_fork_move(board, player, move):
+        score += config["fork_weight"]
 
-    # Diagonal protection
-    protection_bonus = 0
-    if (end_col - 1 >= 0 and board[end_row][end_col - 1] == player) or (end_col + 1 < len(board[end_row]) and board[end_row][end_col + 1] == player):
-        protection_bonus = 1
+    if is_defensive_move(board, player, move):
+        score += config["defense_weight"]
 
-    return central_bonus + protection_bonus
+    score += config["objective_weight"] * (move[1][0] if player == 1 else len(board) - move[1][0] - 1)
+
+    if is_blocking_enemy_fork_move(board, player, move):
+        score += config["block_fork_weight"]
+
+    if is_safe_move(board, player, move):
+        score += config["safe_move_weight"]
+
+    return score
+
+
+def is_blocking_enemy_fork_move(board, player, move):
+    new_board = apply_move(board, move)
+    opponent_moves = generate_moves(new_board, 3 - player)
+    return not any(is_fork_move(new_board, 3 - player, opp_move) for opp_move in opponent_moves)
+
+
+def is_safe_move(board, player, move):
+    new_board = apply_move(board, move)
+    opponent_moves = generate_moves(new_board, 3 - player)
+    return not any(is_capturing_move(opp_move) and opp_move[1] == move[1] for opp_move in opponent_moves)
+
+
+def is_center_move(move):
+    _, dest = move
+    return dest == (1, 1) or dest == (1, 2) or dest == (2, 1) or dest == (2, 2)
+
+
+def is_fork_move(board, player, move):
+    new_board = apply_move(board, move)
+    opponent_moves = generate_moves(new_board, 3 - player)
+    return sum(1 for opp_move in opponent_moves if is_capturing_move(opp_move)) >= 2
+
+
+def is_defensive_move(board, player, move):
+    new_board = apply_move(board, move)
+    opponent_moves = generate_moves(new_board, 3 - player)
+    return any(is_capturing_move(opp_move) for opp_move in opponent_moves)
+
+
+def is_winning_move(board, player, move):
+    _, dest = move
+    return dest[0] == len(board) - 1 if player == 1 else dest[0] == 0
+
+
+def is_capturing_move(move):
+    src, dest = move
+    return abs(src[1] - dest[1]) == 1
