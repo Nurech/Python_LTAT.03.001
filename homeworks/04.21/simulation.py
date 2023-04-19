@@ -12,7 +12,7 @@ def clear_console():
         os.system("clear")
 
 def main():
-    num_simulations = 100
+    num_simulations = 500
     print_interval = 1
 
     data = load_data()

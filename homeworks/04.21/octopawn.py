@@ -1,30 +1,8 @@
-# Prioritize:
-# 1. Force enemy into bad move
-# 2. Take enemy pawn
-# 3. Make empty move when no other options
-# 4. Protect diagonal vectors
-# 5. Try to control center (to take pawns)
-# 6. Alpha-beta pruning (search through a larger space of possible moves)
-
-# Version 1.0 is 14.55% win rate
-# Version 1.1 is 88.00% win rate
-# Version 1.2 ???
-
-# Completed games: 1000
-# ----------------------Wins statistics:----------------------
-# White (Player 1): 880 (88.00%)
-# Black (Player 2): 120 (12.00%)
-# Draws: 0 (0.00%)
-# -----------------Win statistics bar chart:------------------
-# Player 1: ################################################## (880, 88.00%)
-# Player 2: ###### (120, 12.00%)
-# Draws:  (0, 0.00%)
-# ------------------------------------------------------------
-
 def find_move(board, player):
     empty_moves = []
     capture_moves = []
     forced_capture_moves = []
+    corner_moves = []
 
     for row in range(len(board)):
         for col in range(len(board[row])):
@@ -41,18 +19,24 @@ def find_move(board, player):
                             forced_capture_moves.append(move)
                     else:
                         empty_moves.append(move)
+                        if move[1] == (0, 3) and player == 1 or move[1] == (3, 0) and player == 2:
+                            corner_moves.append(move)
 
     capture_moves.sort(key=lambda move: move[1][0], reverse=(player == 1))
     empty_moves.sort(key=lambda move: (evaluate_move(board, player, move), move[1][0]), reverse=(player == 1))
+    corner_moves.sort(key=lambda move: move[1][0], reverse=(player == 1))
 
     if forced_capture_moves:
         return forced_capture_moves[0]
     elif capture_moves:
         return capture_moves[0]
+    elif corner_moves:
+        return corner_moves[0]
     elif empty_moves:
         return empty_moves[0]
     else:
         return None
+
 
 def get_all_valid_moves(board, player):
     all_moves = []
@@ -103,4 +87,9 @@ def evaluate_move(board, player, move):
     if (end_col - 1 >= 0 and board[end_row][end_col - 1] == player) or (end_col + 1 < len(board[end_row]) and board[end_row][end_col + 1] == player):
         protection_bonus = 1
 
-    return central_bonus + protection_bonus
+    # Capturing bonus
+    capturing_bonus = 0
+    if is_capture_move(board, move):
+        capturing_bonus = 1
+
+    return central_bonus + protection_bonus + capturing_bonus
