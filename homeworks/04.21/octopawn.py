@@ -20,20 +20,21 @@ def apply_move(board, move):
     return new_board
 
 
-def find_move(board, player, config=None):
+def find_move(board, player):
+    config = None
     if config is None:
         config = {
-            "grouping_weight": 2,
-            "capture_weight": 2,
-            "center_weight": 2,
-            "fork_weight": 2,
+            "grouping_weight": 1,
+            "capture_weight": 10,
+            "center_weight": 5,
+            "fork_weight": 1,
             "defense_weight": 2,
-            "objective_weight": 2,
+            "objective_weight": 20,
             "block_fork_weight": 2,
-            "safe_move_weight": 2,
-            "edge_weight": 2,
+            "safe_move_weight": 4,
+            "edge_weight": 3,
             "corner_weight": 2,
-            "avoid_opportunity_weight": 2,
+            "avoid_opportunity_weight": 3,
         }
 
     best_move = None
@@ -51,8 +52,8 @@ def find_move(board, player, config=None):
 
 def evaluate_move(board, player, move, config):
     opponent = 3 - player
-    if is_winning_move(board, player, move):
-        return float('inf')
+    # if is_winning_move(board, player, move):
+    #     return float('inf')
 
     score = 0
     if is_grouping_move(board, player, move):

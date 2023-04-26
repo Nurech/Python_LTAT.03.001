@@ -12,8 +12,8 @@ def clear_console():
         os.system("clear")
 
 def main():
-    num_simulations = 100
-    print_interval = 1
+    num_simulations = 1000
+    print_interval = 10
 
     data = load_data()
     wins = data["wins"]

@@ -40,32 +40,33 @@ def save_configs(configs):
 
 
 def generate_config_based_on_previous_configs(previous_configs):
-    if not previous_configs:
-        return generate_random_config()
-
-    def get_trend(configs, key):
-        if len(configs) < 2:
-            return 0
-        trend = 0
-        for i in range(1, len(configs)):
-            trend += configs[i][key] - configs[i - 1][key]
-        return trend / (len(configs) - 1)
-
-    sorted_configs = sorted(previous_configs, key=lambda x: x["config_score"], reverse=True)
-    config = {}
-    no_change = True
-    for key in keys:
-        trend = get_trend(sorted_configs, key)
-        adjustment = 1 if trend > 0 else -1 if trend < 0 else 0
-        config[key] = max(1, min(10, sorted_configs[0][key] + adjustment))
-        if adjustment != 0:
-            no_change = False
-
-    if no_change:
-        key_to_change = random.choice(keys)
-        config[key_to_change] = max(1, min(10, config[key_to_change] + random.choice([-1, 1])))
-
-    return config
+    return generate_random_config()
+    # if not previous_configs:
+    #     pass
+    #
+    # def get_trend(configs, key):
+    #     if len(configs) < 2:
+    #         return 0
+    #     trend = 0
+    #     for i in range(1, len(configs)):
+    #         trend += configs[i][key] - configs[i - 1][key]
+    #     return trend / (len(configs) - 1)
+    #
+    # sorted_configs = sorted(previous_configs, key=lambda x: x["config_score"], reverse=True)
+    # config = {}
+    # no_change = True
+    # for key in keys:
+    #     trend = get_trend(sorted_configs, key)
+    #     adjustment = 1 if trend > 0 else -1 if trend < 0 else 0
+    #     config[key] = max(1, min(10, sorted_configs[0][key] + adjustment))
+    #     if adjustment != 0:
+    #         no_change = False
+    #
+    # if no_change:
+    #     key_to_change = random.choice(keys)
+    #     config[key_to_change] = max(1, min(10, config[key_to_change] + random.choice([-1, 1])))
+    #
+    # return config
 
 
 def generate_random_config():
@@ -86,7 +87,7 @@ def generate_random_config():
 
 def main():
     total_simulations = 100000
-    simulations_per_config = 10
+    simulations_per_config = 100
     num_configs = total_simulations // simulations_per_config
 
     previous_configs = load_previous_configs()
