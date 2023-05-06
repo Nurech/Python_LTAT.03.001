@@ -11,6 +11,24 @@ DIGIT_GRIDS = {
     '9': (' -- ', '|  |', ' -- ', '   |', ' -- '),
 }
 
+#
+# --
+#   |
+#   |
+#  --
+# |
+# |
+#  --
+#
+#
+#
+# -
+#  |
+# -
+# |
+#  -
+#
+#
 def resize_grid(grid, size):
     resized_grid = []
     for row in grid:
@@ -32,8 +50,10 @@ def display_number(number, size):
         print(line[:-size])
 
 def main():
-    number = int(input('Enter number: '))
-    size = int(input('Enter size: '))
+    # number = int(input('Enter number: '))
+    number = int(1234)
+    # size = int(input('Enter size: '))
+    size = int(2)
     display_number(number, size)
 
 if __name__ == '__main__':
