@@ -1,0 +1,7 @@
+ https://www.ut.ee/~vilo/
+ The lecture lasts 90 minutes.
+ http://users.design.ucla.edu/~reas/
+ https://www.ut.ee/et/oppekorraldus
+ https://kodu.ut.ee/~koit/kursused.html
+ https://www.ut.ee/~kiho/
+ The notation "x ~ y" means that x and y are of the same order.
