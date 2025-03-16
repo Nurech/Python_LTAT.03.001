@@ -17,8 +17,8 @@ def upload_random_text(api_key, account_id, random_text):
     response = urllib.request.urlopen(req)
     return json.loads(response.read())
 
-api_key = "secret_W142ho1AiBjsP2AmE44yQrT3xkrh"
-account_id = "W142ho1"
+api_key = ""
+account_id = ""
 
 random_text = generate_random_text()
 response_json = upload_random_text(api_key, account_id, random_text)
